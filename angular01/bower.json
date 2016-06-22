@@ -1,0 +1,32 @@
+{
+  "name": "angular01",
+  "homepage": "https://github.com/Cho-Young-Il/angular.git",
+  "moduleType": [],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.4",
+    "font-awesome": "~4.3.0",
+    "clean-blog": "1.0.0",
+    "autogrow-textarea": "*",
+    "jquery-smooth-scroll": "*",
+    "angular": "^1.5.7"
+  },
+  "install": {
+    "path": "public/libs",
+    "sources": {
+      "bootstrap": "bower_components/bootstrap/dist/**",
+      "font-awesome": "bower_components/font-awesome/**",
+      "clean-blog": "bower_components/clean-blog/**",
+      "autogrow-textarea": "bower_components/autogrow-textarea/**",
+      "jquery-smooth-scroll": "bower_components/jquery-smooth-scroll/**",
+      "angular": "bower_components/angular/**"
+    }
+  }
+}
