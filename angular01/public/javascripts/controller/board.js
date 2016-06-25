@@ -65,6 +65,14 @@ angular.module("angular01App", []).run(['$rootScope', function($rootScope) {
         $scope.pageNo = $scope.lastPage;
         $scope.getList();
     };
+    $scope.searchTypeChange = function(searchType) {
+        $scope.searchType = searchType;
+    };
+    $scope.searchWithKeyword = function() {
+        $scope.searchKeyword = angular.element("#searchKeyword").val();
+        console.log($scope.searchKeyword);
+        $scope.getList();
+    }
 
     $scope.boardRegist = function() {
         $http.post("/board/regist", $scope.formData)

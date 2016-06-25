@@ -29,15 +29,15 @@ router.get("/list", function(req, res, next) {
     var queryString = "select bno, bwriter, btitle, bcontent, "
                     + "       to_char(breg_date, 'YY/MM/DD HH12:MI:SS') as bregdate"
                     + "  from board ";
-
-    if(searchType && searchKeyword) {
-        queryString += "where " + searchType + " like '%" + searchKeyword + "%'";
-    } else if(searchType && !searchKeyword) {
-        queryString += "where bwriter like '%" + searchKeyword + "%'"
+    var queryCondition = "";
+    if(searchType !== "anything" && searchType && searchKeyword) {
+        queryCondition += "where " + searchType + " like '%" + searchKeyword + "%'";
+    } else if((searchType === "anything" || !searchType) && searchKeyword) {
+        queryCondition += "where bwriter like '%" + searchKeyword + "%'"
             + " or btitle like '%" + searchKeyword + "%'"
             + " or bcontent like '%" + searchKeyword + "%'";
     }
-
+    queryString += queryCondition;
     queryString += " order by bno desc limit " + HOWMANY_PER_PAGE + " offset " + start;
 
     var jsonData = Map();
@@ -51,7 +51,7 @@ router.get("/list", function(req, res, next) {
         }
 
         var cnt = undefined;
-        var query = client.query("select count(*) cnt from board");
+        var query = client.query("select count(*) cnt from board " + queryCondition);
         query.on("row", function(row) {
             cnt = row.cnt;
         }).on("end", function() {

@@ -34,18 +34,19 @@
                                             <span id="searchType">Filter by</span> <span class="caret"></span>
                                         </button>
                                         <ul class="dropdown-menu" role="menu">
-                                            <li><a class="search-type">Title</a></li>
-                                            <li><a class="search-type">Content</a></li>
-                                            <li><a class="search-type">Writer</a></li>
+                                            <li><a class="search-type" ng-click="searchTypeChange('btitle')">Title</a></li>
+                                            <li><a class="search-type" ng-click="searchTypeChange('bcontent')">Content</a></li>
+                                            <li><a class="search-type" ng-click="searchTypeChange('bwriter')">Writer</a></li>
                                             <li class="divider"></li>
-                                            <li><a class="search-type">Anything</a></li>
+                                            <li><a class="search-type" ng-click="searchTypeChange('anything')">Anything</a></li>
                                         </ul>
                                     </div>
                                     <input type="hidden" name="type" value="anything">
-                                    <input type="text" class="form-control" name="keyword" placeholder="Search">
+                                    <input type="text" class="form-control" id="searchKeyword" placeholder="Search">
                                     <span class="input-group-btn">
-                                         <button class="btn btn-primary" type="button"><span
-                                              class="glyphicon glyphicon-search"></span></button>
+                                         <button class="btn btn-primary" type="button" ng-click="searchWithKeyword()">
+                                             <span class="glyphicon glyphicon-search"></span>
+                                         </button>
                                    </span>
                                 </div>
                             </div>
