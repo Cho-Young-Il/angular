@@ -1,5 +1,5 @@
 /**
- * Created by MacintoshHD on 2016. 6. 22..
+ * Created by joyikr@gmail.com on 2016. 6. 22..
  */
 var express = require('express');
 var router = express.Router();
@@ -26,7 +26,7 @@ router.get("/list", function(req, res, next) {
     var start = (pageNo - 1) * HOWMANY_PER_PAGE + 1;
     var end = pageNo * HOWMANY_PER_PAGE;
 
-    var queryString = "select bno, bwriter, btitle, bcontent, "
+    var queryString = "select bno, bwriter, btitle, "
                     + "       to_char(breg_date, 'YY/MM/DD HH12:MI:SS') as bregdate"
                     + "  from board ";
     var queryCondition = "";
@@ -38,7 +38,7 @@ router.get("/list", function(req, res, next) {
             + " or bcontent like '%" + searchKeyword + "%'";
     }
     queryString += queryCondition;
-    queryString += " order by bno desc limit " + HOWMANY_PER_PAGE + " offset " + start;
+    queryString += " order by bno desc limit " + HOWMANY_PER_PAGE + " offset " + (start - 1);
 
     var jsonData = Map();
     var boardList = [];
@@ -109,6 +109,66 @@ router.post("/regist", function(req, res, next) {
     });
 });
 
+router.get("/detail", function(req, res, next) {
+    console.log("execute board detail controller");
+
+    connPool.connect(function(err, client, release) {
+        var query = client.query("select bno, btitle, bcontent, bwriter, "
+            + "                   to_char(breg_date, 'YY/MM/DD HH12:MI:SS') as bregdate"
+            + "               from board"
+            + "              where bno = " + req.param("bno"));
+        var board = new Board();
+        query.on("row", function(row) {
+            board.setBno(row.bno)
+                .setBtitle(row.btitle)
+                .setBcontent(row.bcontent)
+                .setBwriter(row.bwriter)
+                .setBregDate(row.bregdate);
+        }).on("end", function() {
+            release();
+            return res.json(board);
+        });
+    });
+});
+
+router.post("/update", function(req, res, next) {
+    console.log("execute board update controller");
+
+    connPool.connect(function(err, client, release) {
+        var bno = req.body.bno;
+        var pwdEqui = false;
+        var query = client.query("select bpassword from board where bno = " + bno);
+        query.on("row", function(row) {
+            if(req.body.bpassword === row.bpassword) pwdEqui = true;
+        }).on("end", function() {
+            if(pwdEqui) {
+                client.query("update board set btitle = $1, bcontent = $2 "
+                    + "where bno = $3", [req.body.btitle, req.body.bcontent, bno]);
+            }
+            release();
+            return res.json({success: pwdEqui});
+        });
+    });
+});
+
+router.post("/delete", function(req, res, next) {
+    console.log("execute board delete controller");
+
+    connPool.connect(function(err, client, release) {
+        var bno = req.body.bno;
+        var pwdEqui = false;
+        var query = client.query("select bpassword from board where bno = " + bno);
+        query.on("row", function(row) {
+            if(req.body.bpassword === row.bpassword) pwdEqui = true;
+        }).on("end", function() {
+            if(pwdEqui) {
+                client.query("delete from board where bno= " + bno);
+            }
+            release();
+            return res.json({success: pwdEqui});
+        });
+    });
+});
 
 
 function Map() {

@@ -23,7 +23,7 @@ angular.module("angular01App", []).run(['$rootScope', function($rootScope) {
     };
 }]).controller("boardController", function($scope, $http, $location) {
     $scope.formData = {};
-
+    $scope.readonly = true;
 
     $scope.getList = function() {
         $http.get("/board/list", {
@@ -33,7 +33,6 @@ angular.module("angular01App", []).run(['$rootScope', function($rootScope) {
                 searchKeyword : $scope.searchKeyword
             }
         }).success(function(data) {
-            console.log(data);
             $scope.boardList = data.value.boardList;
             $scope.pageNo = data.value.pageNo;
             $scope.beginPage = data.value.beginPage;
@@ -50,7 +49,7 @@ angular.module("angular01App", []).run(['$rootScope', function($rootScope) {
         $scope.getList();
     };
     $scope.showPreviousPage = function() {
-        $scope.pageNo = $scope.pageNo - 1;
+        $scope.pageNo = parseInt($scope.pageNo) - 1;
         $scope.getList();
     };
     $scope.pageChange = function(event) {
@@ -58,7 +57,7 @@ angular.module("angular01App", []).run(['$rootScope', function($rootScope) {
         $scope.getList();
     };
     $scope.showNextPage = function() {
-        $scope.pageNo = $scope.pageNo + 1;
+        $scope.pageNo = parseInt($scope.pageNo) + 1;
         $scope.getList();
     };
     $scope.showLastPage = function() {
@@ -67,12 +66,13 @@ angular.module("angular01App", []).run(['$rootScope', function($rootScope) {
     };
     $scope.searchTypeChange = function(searchType) {
         $scope.searchType = searchType;
+        angular.element("#searchType").html(searchType);
     };
     $scope.searchWithKeyword = function() {
         $scope.searchKeyword = angular.element("#searchKeyword").val();
-        console.log($scope.searchKeyword);
         $scope.getList();
-    }
+    };
+
 
     $scope.boardRegist = function() {
         $http.post("/board/regist", $scope.formData)
@@ -86,4 +86,76 @@ angular.module("angular01App", []).run(['$rootScope', function($rootScope) {
     };
 
 
+    $scope.boardDetail = function(bno) {
+        $http.get("/board/detail", {
+            params: {
+                bno: bno
+            }
+        }).success(function(data) {
+            $scope.detailBoardBno = data.bno;
+            $scope.detailBoardBtitle = data.btitle;
+            $scope.detailBoardBcontent = data.bcontent;
+            $scope.detailBoardBwriter = data.bwriter;
+            $scope.detailBoardBregDate = data.bregDate;
+        })
+        .error(function(err) {
+            console.log("Error : " + err);
+        });
+    };
+    $scope.detail = function(event) {
+        var bno = $(event.target).attr("bno");
+        $scope.readonly = true;
+        $scope.formData = {};
+        angular.element("#editBtn").css("display", "inline");
+        angular.element("#modifyBtn").css("display", "none");
+        angular.element("#deleteBtn").css("display", "none");
+        angular.element("#boardPwdDiv").css("display", "none");
+        $scope.boardDetail(bno);
+    };
+
+    $scope.editBoard = function() {
+        $scope.readonly = false;
+        angular.element("#editBtn").css("display", "none");
+        angular.element("#modifyBtn").css("display", "inline");
+        angular.element("#deleteBtn").css("display", "inline");
+        angular.element("#boardPwdDiv").css("display", "block");
+    };
+
+    $scope.modifyBoard = function() {
+        $scope.formData.bno = $scope.detailBoardBno;
+        $scope.formData.btitle = $scope.detailBoardBtitle;
+        $scope.formData.bcontent = $scope.detailBoardBcontent;
+        $http.post("/board/update", $scope.formData)
+            .success(function(data) {
+                $scope.formdata = {};
+                angular.element("#detailCloseBtn").trigger("click");
+                if(data.success) {
+                    alert("Board Update Success");
+                    $scope.getList();
+                } else {
+                    alert("Board Update Fail\nCheck Password");
+                }
+            })
+            .error(function(err) {
+                console.log("Error : " + err);
+            });
+    };
+
+    $scope.deleteBoard = function() {
+        $scope.formData.bno = $scope.detailBoardBno;
+        $http.post("/board/delete", $scope.formData)
+            .success(function(data) {
+                $scope.formdata = {};
+                angular.element("#detailCloseBtn").trigger("click");
+                if(data.success) {
+                    alert("Board Delete Success");
+                    $scope.getList();
+                } else {
+                    alert("Board Delete Fail\nCheck Password");
+                }
+            })
+            .error(function(err) {
+                console.log("Error : " + err);
+            });
+    };
 });
