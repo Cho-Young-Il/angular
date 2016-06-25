@@ -15,7 +15,8 @@
     "bootstrap": "~3.3.4",
     "font-awesome": "~4.3.0",
     "clean-blog": "1.0.0",
-    "angular": "^1.5.7"
+    "angular": "^1.5.7",
+    "xss": "^0.2.13"
   },
   "install": {
     "path": "public/libs",
@@ -24,7 +25,8 @@
       "bootstrap": "bower_components/bootstrap/dist/**",
       "font-awesome": "bower_components/font-awesome/**",
       "clean-blog": "bower_components/clean-blog/**",
-      "angular": "bower_components/angular/**"
+      "angular": "bower_components/angular/**",
+      "xss": "bower_components/xss/dist/**"
     }
   }
 }

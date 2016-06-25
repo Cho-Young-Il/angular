@@ -3,6 +3,7 @@
  */
 var express = require('express');
 var router = express.Router();
+var xss = require("xss");
 
 var Pool = require("pg").Pool;
 var connConfig = require("../config/connConfig.js");
@@ -19,8 +20,8 @@ router.get("/list", function(req, res, next) {
 
     const HOWMANY_PER_PAGE = 10;
     var pageNo = req.param("pageNo");
-    var searchKeyword = req.param("searchKeyword");
-    var searchType = req.param("searchType");
+    var searchKeyword = xss(req.param("searchKeyword"));
+    var searchType = xss(req.param("searchType"));
 
     if(!pageNo) pageNo = 1;
     var start = (pageNo - 1) * HOWMANY_PER_PAGE + 1;
@@ -94,10 +95,10 @@ router.post("/regist", function(req, res, next) {
         var board = new Board();
         query.on("row", function(row) {
             board.setBno(row.nextval)
-                .setBtitle(req.body.btitle)
-                .setBcontent(req.body.bcontent)
-                .setBwriter(req.body.bwriter)
-                .setBpassword(req.body.bpassword)
+                .setBtitle(xss(req.body.btitle))
+                .setBcontent(xss(req.body.bcontent))
+                .setBwriter(xss(req.body.bwriter))
+                .setBpassword(xss(req.body.bpassword))
                 .setBregDate(new Date());
         }).on("end", function() {
             client.query("insert into board(bno, btitle, bcontent, bwriter, bpassword, breg_date)"
@@ -143,7 +144,7 @@ router.post("/update", function(req, res, next) {
         }).on("end", function() {
             if(pwdEqui) {
                 client.query("update board set btitle = $1, bcontent = $2 "
-                    + "where bno = $3", [req.body.btitle, req.body.bcontent, bno]);
+                    + "where bno = $3", [xss(req.body.btitle), xss(req.body.bcontent), bno]);
             }
             release();
             return res.json({success: pwdEqui});
