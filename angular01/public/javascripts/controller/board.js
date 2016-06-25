@@ -5,7 +5,16 @@ angular.module("angular01App", [])
     .controller("boardController", function($scope, $http, $location) {
         $scope.formData = {};
 
-        $scope.createTodo = function() {
+        $http.get("/board/list")
+            .success(function(data) {
+                console.log(data);
+                $scope.boardList = data.value.boardList;
+            })
+            .error(function(err) {
+                console.log("Error : " + err);
+            });
+
+        $scope.boardRegist = function() {
             $http.post("/board/regist", $scope.formData)
                 .success(function() {
                     $scope.formdata = {};
@@ -13,6 +22,6 @@ angular.module("angular01App", [])
                 })
                 .error(function(err) {
                     console.log("Error : " + err);
-                })
-        }
+                });
+        };
     });
