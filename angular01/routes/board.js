@@ -18,9 +18,9 @@ router.get("/list", function(req, res, next) {
     console.log("execute board list controller");
 
     const HOWMANY_PER_PAGE = 10;
-    var pageNo = req.body.pageNo;
-    var searchKeyword = req.body.searchKeyword;
-    var searchType = req.body.searchType;
+    var pageNo = req.param("pageNo");
+    var searchKeyword = req.param("searchKeyword");
+    var searchType = req.param("searchType");
 
     if(!pageNo) pageNo = 1;
     var start = (pageNo - 1) * HOWMANY_PER_PAGE + 1;
