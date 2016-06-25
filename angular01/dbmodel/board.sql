@@ -6,7 +6,7 @@ CREATE TABLE "board"
 (
 	"bno"       integer      NOT NULL, -- 일련번호
 	"bwriter"   varchar(50)  NOT NULL, -- 작성자
-	"bpassword" varchar(100) NOT NULL, -- 비밀번호
+	"bpassword" varchar(255) NOT NULL, -- 비밀번호
 	"btitle"    varchar(255) NOT NULL, -- 제목
 	"bcontent"  text         NOT NULL, -- 내용
 	"breg_date" timestamp    NOT NULL  -- 등록일

@@ -4,6 +4,7 @@
 var express = require('express');
 var router = express.Router();
 var xss = require("xss");
+var bcrypt = require("bcryptjs");
 
 var Pool = require("pg").Pool;
 var connConfig = require("../config/connConfig.js");
@@ -97,8 +98,8 @@ router.post("/regist", function(req, res, next) {
             board.setBno(row.nextval)
                 .setBtitle(xss(req.body.btitle))
                 .setBcontent(xss(req.body.bcontent))
-                .setBwriter(xss(req.body.bwriter))
-                .setBpassword(xss(req.body.bpassword))
+                .setBwriter((xss(req.body.bwriter)))
+                .setBpassword(bcrypt.hashSync(xss(req.body.bpassword)))
                 .setBregDate(new Date());
         }).on("end", function() {
             client.query("insert into board(bno, btitle, bcontent, bwriter, bpassword, breg_date)"
@@ -140,7 +141,7 @@ router.post("/update", function(req, res, next) {
         var pwdEqui = false;
         var query = client.query("select bpassword from board where bno = " + bno);
         query.on("row", function(row) {
-            if(req.body.bpassword === row.bpassword) pwdEqui = true;
+            if(bcrypt.compareSync(req.body.bpassword, row.bpassword)) pwdEqui = true;
         }).on("end", function() {
             if(pwdEqui) {
                 client.query("update board set btitle = $1, bcontent = $2 "
@@ -160,7 +161,7 @@ router.post("/delete", function(req, res, next) {
         var pwdEqui = false;
         var query = client.query("select bpassword from board where bno = " + bno);
         query.on("row", function(row) {
-            if(req.body.bpassword === row.bpassword) pwdEqui = true;
+            if(bcrypt.compareSync(req.body.bpassword, row.bpassword)) pwdEqui = true;
         }).on("end", function() {
             if(pwdEqui) {
                 client.query("delete from board where bno= " + bno);
