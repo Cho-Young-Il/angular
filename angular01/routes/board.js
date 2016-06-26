@@ -3,7 +3,6 @@
  */
 var express = require('express');
 var router = express.Router();
-var xss = require("xss");
 var bcrypt = require("bcryptjs");
 
 var Pool = require("pg").Pool;
@@ -20,9 +19,11 @@ router.get("/list", function(req, res, next) {
     console.log("execute board list controller");
 
     const HOWMANY_PER_PAGE = 10;
+    const PAGE_UNIT = 5;
+
     var pageNo = req.param("pageNo");
-    var searchKeyword = xss(req.param("searchKeyword"));
-    var searchType = xss(req.param("searchType"));
+    var searchKeyword = req.param("searchKeyword");
+    var searchType = req.param("searchType");
 
     if(!pageNo) pageNo = 1;
     var start = (pageNo - 1) * HOWMANY_PER_PAGE + 1;
@@ -63,12 +64,12 @@ router.get("/list", function(req, res, next) {
             }).on("end", function() {
                 release();
 
-                var lastPage = (parseInt(cnt % HOWMANY_PER_PAGE) == 0) ?
-                                parseInt(cnt / HOWMANY_PER_PAGE) : parseInt(cnt / HOWMANY_PER_PAGE + 1);
-                var currTab = parseInt((pageNo - 1) / HOWMANY_PER_PAGE + 1);
-                var beginPage = (currTab - 1) * HOWMANY_PER_PAGE + 1;
-                var endPage = (currTab * HOWMANY_PER_PAGE > lastPage) ?
-                                lastPage : currTab * HOWMANY_PER_PAGE;
+                var lastPage = (parseInt(cnt % PAGE_UNIT) == 0) ?
+                                parseInt(cnt / PAGE_UNIT) : parseInt(cnt / PAGE_UNIT + 1);
+                var currTab = parseInt((pageNo - 1) / PAGE_UNIT + 1);
+                var beginPage = (currTab - 1) * PAGE_UNIT + 1;
+                var endPage = (currTab * PAGE_UNIT > lastPage) ?
+                                lastPage : currTab * PAGE_UNIT;
 
                 jsonData.put("pageNo", pageNo);
                 jsonData.put("lastPage", lastPage);
@@ -94,12 +95,13 @@ router.post("/regist", function(req, res, next) {
 
         var query = client.query("select nextval('seq_board')");
         var board = new Board();
+        console.log(req.body.bpassword);
         query.on("row", function(row) {
             board.setBno(row.nextval)
-                .setBtitle(xss(req.body.btitle))
-                .setBcontent(xss(req.body.bcontent))
-                .setBwriter((xss(req.body.bwriter)))
-                .setBpassword(bcrypt.hashSync(xss(req.body.bpassword)))
+                .setBtitle(req.body.btitle)
+                .setBcontent(req.body.bcontent)
+                .setBwriter(req.body.bwriter)
+                .setBpassword(bcrypt.hashSync(req.body.bpassword))
                 .setBregDate(new Date());
         }).on("end", function() {
             client.query("insert into board(bno, btitle, bcontent, bwriter, bpassword, breg_date)"
@@ -135,7 +137,7 @@ router.get("/detail", function(req, res, next) {
 
 router.post("/update", function(req, res, next) {
     console.log("execute board update controller");
-
+    console.log(req.body.bpassword);
     connPool.connect(function(err, client, release) {
         var bno = req.body.bno;
         var pwdEqui = false;
@@ -145,7 +147,7 @@ router.post("/update", function(req, res, next) {
         }).on("end", function() {
             if(pwdEqui) {
                 client.query("update board set btitle = $1, bcontent = $2 "
-                    + "where bno = $3", [xss(req.body.btitle), xss(req.body.bcontent), bno]);
+                    + "where bno = $3", [req.body.btitle, req.body.bcontent, bno]);
             }
             release();
             return res.json({success: pwdEqui});
@@ -158,10 +160,12 @@ router.post("/delete", function(req, res, next) {
 
     connPool.connect(function(err, client, release) {
         var bno = req.body.bno;
+        var bpassword = req.body.bpassword;
         var pwdEqui = false;
+        if(!bpassword) return res.json({success: pwdEqui});
         var query = client.query("select bpassword from board where bno = " + bno);
         query.on("row", function(row) {
-            if(bcrypt.compareSync(req.body.bpassword, row.bpassword)) pwdEqui = true;
+            if(bcrypt.compareSync(bpassword, row.bpassword)) pwdEqui = true;
         }).on("end", function() {
             if(pwdEqui) {
                 client.query("delete from board where bno= " + bno);

@@ -24,13 +24,15 @@ angular.module("angular01App", []).run(['$rootScope', function($rootScope) {
 }]).controller("boardController", function($scope, $http, $location) {
     $scope.formData = {};
     $scope.readonly = true;
-
+    $scope.initFormData = function() {
+        $scope.formData = {};
+    }
     $scope.getList = function() {
         $http.get("/board/list", {
             params: {
                 pageNo: $scope.pageNo,
-                searchType : filterXSS($scope.searchType),
-                searchKeyword : filterXSS($scope.searchKeyword)
+                searchType : $scope.searchType,
+                searchKeyword : $scope.searchKeyword
             }
         }).success(function(data) {
             $scope.boardList = data.value.boardList;
@@ -75,10 +77,6 @@ angular.module("angular01App", []).run(['$rootScope', function($rootScope) {
 
 
     $scope.boardRegist = function() {
-        $scope.formData.btitle = filterXSS($scope.formData.btitle);
-        $scope.formData.bcontent = filterXSS($scope.formData.bcontent);
-        $scope.formData.bwriter = filterXSS($scope.formData.bwriter);
-        $scope.formData.bpassword = filterXSS($scope.formData.bpassword);
         $http.post("/board/regist", $scope.formData)
             .success(function() {
                 $scope.formdata = {};
@@ -97,9 +95,9 @@ angular.module("angular01App", []).run(['$rootScope', function($rootScope) {
             }
         }).success(function(data) {
             $scope.detailBoardBno = data.bno;
-            $scope.detailBoardBtitle = filterXSS(data.btitle);
-            $scope.detailBoardBcontent = filterXSS(data.bcontent);
-            $scope.detailBoardBwriter = filterXSS(data.bwriter);
+            $scope.detailBoardBtitle = data.btitle;
+            $scope.detailBoardBcontent = data.bcontent;
+            $scope.detailBoardBwriter = data.bwriter;
             $scope.detailBoardBregDate = data.bregDate;
         })
         .error(function(err) {
@@ -127,11 +125,11 @@ angular.module("angular01App", []).run(['$rootScope', function($rootScope) {
 
     $scope.modifyBoard = function() {
         $scope.formData.bno = $scope.detailBoardBno;
-        $scope.formData.btitle = filterXSS($scope.detailBoardBtitle);
-        $scope.formData.bcontent = filterXSS($scope.detailBoardBcontent);
+        $scope.formData.btitle = $scope.detailBoardBtitle;
+        $scope.formData.bcontent = $scope.detailBoardBcontent;
         $http.post("/board/update", $scope.formData)
             .success(function(data) {
-                $scope.formdata = {};
+                $scope.formData = {};
                 angular.element("#detailCloseBtn").trigger("click");
                 if(data.success) {
                     alert("Board Update Success");
