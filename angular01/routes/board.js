@@ -64,8 +64,8 @@ router.get("/list", function(req, res, next) {
             }).on("end", function() {
                 release();
 
-                var lastPage = (parseInt(cnt % PAGE_UNIT) == 0) ?
-                                parseInt(cnt / PAGE_UNIT) : parseInt(cnt / PAGE_UNIT + 1);
+                var lastPage = (parseInt(cnt % HOWMANY_PER_PAGE) == 0) ?
+                                parseInt(cnt / HOWMANY_PER_PAGE) : parseInt(cnt / HOWMANY_PER_PAGE + 1);
                 var currTab = parseInt((pageNo - 1) / PAGE_UNIT + 1);
                 var beginPage = (currTab - 1) * PAGE_UNIT + 1;
                 var endPage = (currTab * PAGE_UNIT > lastPage) ?
